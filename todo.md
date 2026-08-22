@@ -53,3 +53,15 @@
 - [x] Queue a pending favorite removal when unsaved changes are toggled off before the save mutation resolves
 - [x] Add a regression test for rapid favorite save/remove reconciliation
 - [x] Save the final checkpoint and send the user-facing enhancement report
+- [x] Add a modern layered antigravity authentication entry page
+- [x] Add sign-in, sign-up/create-account, and forgot-password states with accessible credential forms
+- [x] Connect sign-in to the existing secure Manus auth flow without storing passwords locally
+- [x] Add backend-ready Supabase Auth credential flow documentation and safe error states
+- [x] Add responsive authentication styling, tests, and visual verification
+- [x] Save a new checkpoint and report the authentication addition
+- [x] Document the Supabase Auth credential flow and required configuration for sign-in, sign-up, and password reset
+- [x] Add auth behavior tests for mode switching, validation, forgot-password state, and secure sign-in handoff
+- [x] Save a fresh checkpoint after the authentication changes and send the final auth update report
+- [x] Add a verifiable auth mode-transition helper covering sign-in, create-account, and forgot-password navigation
+- [x] Add a secure sign-in handoff helper test proving passwords are never stored locally
+- [x] Save the final authentication checkpoint and send the user-facing report
