@@ -67,3 +67,5 @@
 - [x] Save the final authentication checkpoint and send the user-facing report
 - [x] Replace the purple background treatment with a modern minimalist neutral-blue antigravity layered background without changing other UI
 - [x] Verify the background-only change visually and save a new checkpoint
+- [x] Change only the global and auth background layers to a warm off-white soft neutral antigravity surface
+- [x] Visually verify the warm background and save a new checkpoint
