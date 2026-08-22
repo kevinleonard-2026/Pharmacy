@@ -1,6 +1,6 @@
 import { and, eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { DoseEvent, InsertMedicine, InsertReminderConfig, InsertUser, doseEvents, medicines, reminderConfigs, users } from "../drizzle/schema";
+import { DoseEvent, InsertFavoritePharmacy, InsertMedicine, InsertReminderConfig, InsertUser, doseEvents, favoritePharmacies, medicines, reminderConfigs, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -142,4 +142,23 @@ export async function updateReminderConfigForOwner(ownerId: number, reminderId: 
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
   return db.update(reminderConfigs).set(input).where(and(eq(reminderConfigs.id, reminderId), eq(reminderConfigs.ownerId, ownerId)));
+}
+
+
+export async function listFavoritePharmaciesForOwner(ownerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(favoritePharmacies).where(eq(favoritePharmacies.ownerId, ownerId)).orderBy(desc(favoritePharmacies.createdAt));
+}
+
+export async function saveFavoritePharmacyForOwner(ownerId: number, input: Omit<InsertFavoritePharmacy, "ownerId">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  return db.insert(favoritePharmacies).values({ ...input, ownerId });
+}
+
+export async function removeFavoritePharmacyForOwner(ownerId: number, favoriteId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  return db.delete(favoritePharmacies).where(and(eq(favoritePharmacies.id, favoriteId), eq(favoritePharmacies.ownerId, ownerId)));
 }

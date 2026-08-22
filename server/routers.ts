@@ -5,7 +5,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { createMedicineForOwner, createReminderConfigForOwner, listMedicinesForOwner, listReminderConfigsForOwner, setReminderTaskUid, updateDoseEventStatus, updateMedicineForOwner, updateReminderConfigForOwner } from "./db";
+import { createMedicineForOwner, createReminderConfigForOwner, listFavoritePharmaciesForOwner, listMedicinesForOwner, listReminderConfigsForOwner, removeFavoritePharmacyForOwner, saveFavoritePharmacyForOwner, setReminderTaskUid, updateDoseEventStatus, updateMedicineForOwner, updateReminderConfigForOwner } from "./db";
 import { getIntegrationStatus } from "./integrations";
 
 const medicineInput = z.object({ name: z.string().min(1).max(160), dose: z.string().min(1).max(120), form: z.string().default("Tablet"), instructions: z.string().min(1), scheduleLabel: z.string().min(1), scheduleTimes: z.string().min(1), refillDate: z.date().nullable().optional(), remainingDoses: z.number().int().nonnegative().default(0), notes: z.string().nullable().optional() });
@@ -20,6 +20,11 @@ export const appRouter = router({
     list: protectedProcedure.query(({ ctx }) => listMedicinesForOwner(ctx.user.id)),
     create: protectedProcedure.input(medicineInput).mutation(({ ctx, input }) => createMedicineForOwner(ctx.user.id, input)),
     update: protectedProcedure.input(z.object({ id: z.number().int(), patch: medicineInput.partial() })).mutation(({ ctx, input }) => updateMedicineForOwner(ctx.user.id, input.id, input.patch)),
+  }),
+  favorites: router({
+    list: protectedProcedure.query(({ ctx }) => listFavoritePharmaciesForOwner(ctx.user.id)),
+    save: protectedProcedure.input(z.object({ externalId: z.string().min(1).max(160), name: z.string().min(1).max(160), address: z.string().min(1).max(240), latitude: z.number(), longitude: z.number() })).mutation(async ({ ctx, input }) => { const result = await saveFavoritePharmacyForOwner(ctx.user.id, { ...input, latitude: String(input.latitude), longitude: String(input.longitude) }); return { id: Number((result as any)[0]?.insertId ?? 0), ...input }; }),
+    remove: protectedProcedure.input(z.object({ id: z.number().int() })).mutation(({ ctx, input }) => removeFavoritePharmacyForOwner(ctx.user.id, input.id)),
   }),
   doseEvents: router({
     mark: protectedProcedure.input(z.object({ id: z.number().int(), status: z.enum(["due", "taken", "missed", "upcoming"]) })).mutation(({ ctx, input }) => updateDoseEventStatus(ctx.user.id, input.id, input.status)),

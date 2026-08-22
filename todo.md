@@ -36,3 +36,20 @@
 - [x] Save a new checkpoint and report the map system addition
 - [x] Add Vitest coverage for pharmacy map search, selection, and location behaviors
 - [x] Save a fresh checkpoint after the map changes and report the map system addition
+- [x] Make the pharmacy map location-first and avoid showing fixed foreign-country pharmacy data
+- [x] Add nearby pharmacy discovery from the user’s current location with a permission-safe empty state
+- [x] Add route directions and estimated travel times to the selected pharmacy
+- [x] Add persistent favorite pharmacy records and a quick-access favorites list
+- [x] Add responsive styling and tests for nearby, directions, travel time, and favorites behavior
+- [x] Save a new checkpoint and report the map enhancements
+- [x] Load saved favorites from the backend on map startup and sync add/remove actions through protected procedures
+- [x] Add verifiable tests for location states, route summaries, travel-time output, and favorite add/remove behavior
+- [x] Save a fresh checkpoint after the latest route, location, and favorites enhancements and report the update
+- [x] Invalidate or refetch favorites after save/remove and ensure newly added favorites can be removed server-side
+- [x] Add Vitest coverage for permission-safe idle, live, and denied location states
+- [x] Save a fresh checkpoint after the latest route, location, and favorites enhancements and send the final update report
+- [x] Reconcile newly saved favorite IDs immediately so rapid remove actions always reach the backend
+- [x] Save and report the final route, location, directions, and favorites enhancement checkpoint
+- [x] Queue a pending favorite removal when unsaved changes are toggled off before the save mutation resolves
+- [x] Add a regression test for rapid favorite save/remove reconciliation
+- [x] Save the final checkpoint and send the user-facing enhancement report

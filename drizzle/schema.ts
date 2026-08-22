@@ -39,6 +39,17 @@ export const doseEvents = mysqlTable("dose_events", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const favoritePharmacies = mysqlTable("favorite_pharmacies", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),
+  externalId: varchar("externalId", { length: 160 }).notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  address: varchar("address", { length: 240 }).notNull(),
+  latitude: varchar("latitude", { length: 32 }).notNull(),
+  longitude: varchar("longitude", { length: 32 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export const reminderConfigs = mysqlTable("reminder_configs", {
   id: int("id").autoincrement().primaryKey(),
   ownerId: int("ownerId").notNull(),
@@ -59,3 +70,5 @@ export type DoseEvent = typeof doseEvents.$inferSelect;
 export type InsertDoseEvent = typeof doseEvents.$inferInsert;
 export type ReminderConfig = typeof reminderConfigs.$inferSelect;
 export type InsertReminderConfig = typeof reminderConfigs.$inferInsert;
+export type FavoritePharmacy = typeof favoritePharmacies.$inferSelect;
+export type InsertFavoritePharmacy = typeof favoritePharmacies.$inferInsert;
