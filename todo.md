@@ -65,3 +65,5 @@
 - [x] Add a verifiable auth mode-transition helper covering sign-in, create-account, and forgot-password navigation
 - [x] Add a secure sign-in handoff helper test proving passwords are never stored locally
 - [x] Save the final authentication checkpoint and send the user-facing report
+- [x] Replace the purple background treatment with a modern minimalist neutral-blue antigravity layered background without changing other UI
+- [x] Verify the background-only change visually and save a new checkpoint
