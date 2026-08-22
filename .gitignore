@@ -112,3 +112,18 @@ temp/
 # Manus version file (auto-generated, not part of source)
 client/public/__manus__/version.json
 .project-config.json
+
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+
+# Local runtime and test output
+.manus-logs/
+dist/
+coverage/
+*.log
+*.local
+
+# Managed preview/debug assets are not application source
+client/public/__manus__/

@@ -69,3 +69,6 @@
 - [x] Verify the background-only change visually and save a new checkpoint
 - [x] Restore the previous normal dark blueprint background and preserve all other UI
 - [x] Verify the reverted dashboard and auth background and save a new checkpoint
+- [x] Audit tracked files and ignore rules for secrets, logs, build output, local metadata, and temporary artifacts
+- [x] Remove inappropriate tracked files while preserving required source, migrations, docs, and .gitignore
+- [x] Commit, push, and verify the cleaned GitHub repository
