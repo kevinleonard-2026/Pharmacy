@@ -28,3 +28,11 @@
 - [x] Add reminder update, pause, and resume flows using updateHeartbeatJob and persist task UID changes
 - [x] Invoke the email reminder adapter from the scheduled reminder callback with safe deduplication and error handling
 - [x] Add Vitest coverage for medicine CRUD/checklist mutations and reminder scheduling/callback behavior
+- [x] Add a real-time pharmacy map view inside the MedGrid workspace
+- [x] Use the scaffolded Google Maps proxy and MapView component without requesting user API keys
+- [x] Add pharmacy search, current-location centering, markers, and selected-pharmacy detail behavior
+- [x] Preserve the blueprint visual system and responsive map placement on desktop and mobile
+- [x] Add map interaction tests and run typecheck, tests, build, and screenshots
+- [x] Save a new checkpoint and report the map system addition
+- [x] Add Vitest coverage for pharmacy map search, selection, and location behaviors
+- [x] Save a fresh checkpoint after the map changes and report the map system addition
