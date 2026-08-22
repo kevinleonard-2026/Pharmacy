@@ -67,3 +67,5 @@
 - [x] Save the final authentication checkpoint and send the user-facing report
 - [x] Replace the purple background treatment with a modern minimalist neutral-blue antigravity layered background without changing other UI
 - [x] Verify the background-only change visually and save a new checkpoint
+- [x] Restore the previous normal dark blueprint background and preserve all other UI
+- [x] Verify the reverted dashboard and auth background and save a new checkpoint
