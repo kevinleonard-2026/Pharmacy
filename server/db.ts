@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { DoseEvent, InsertMedicine, InsertReminderConfig, InsertUser, doseEvents, medicines, reminderConfigs, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -90,3 +90,56 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+
+export async function listMedicinesForOwner(ownerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(medicines).where(eq(medicines.ownerId, ownerId)).orderBy(desc(medicines.updatedAt));
+}
+
+export async function createMedicineForOwner(ownerId: number, input: Omit<InsertMedicine, "ownerId">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  const result = await db.insert(medicines).values({ ...input, ownerId });
+  return result;
+}
+
+export async function updateDoseEventStatus(ownerId: number, doseEventId: number, status: DoseEvent["status"]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  return db.update(doseEvents).set({ status, completedAt: status === "taken" ? new Date() : null }).where(and(eq(doseEvents.id, doseEventId), eq(doseEvents.ownerId, ownerId)));
+}
+
+export async function listReminderConfigsForOwner(ownerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(reminderConfigs).where(eq(reminderConfigs.ownerId, ownerId));
+}
+
+
+export async function createReminderConfigForOwner(ownerId: number, input: Omit<InsertReminderConfig, "ownerId">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  return db.insert(reminderConfigs).values({ ...input, ownerId });
+}
+
+export async function setReminderTaskUid(ownerId: number, reminderId: number, taskUid: string | null) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  return db.update(reminderConfigs).set({ scheduleCronTaskUid: taskUid }).where(and(eq(reminderConfigs.id, reminderId), eq(reminderConfigs.ownerId, ownerId)));
+}
+
+
+export async function updateMedicineForOwner(ownerId: number, medicineId: number, input: Partial<Omit<InsertMedicine, "ownerId">>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  return db.update(medicines).set(input).where(and(eq(medicines.id, medicineId), eq(medicines.ownerId, ownerId)));
+}
+
+
+export async function updateReminderConfigForOwner(ownerId: number, reminderId: number, input: { scheduleCronTaskUid?: string | null; emailEnabled?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not available");
+  return db.update(reminderConfigs).set(input).where(and(eq(reminderConfigs.id, reminderId), eq(reminderConfigs.ownerId, ownerId)));
+}

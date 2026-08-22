@@ -1,17 +1,7 @@
 import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-/**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
- */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -22,7 +12,50 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+export const medicines = mysqlTable("medicines", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),
+  name: varchar("name", { length: 160 }).notNull(),
+  dose: varchar("dose", { length: 120 }).notNull(),
+  form: varchar("form", { length: 80 }).notNull(),
+  instructions: text("instructions").notNull(),
+  scheduleLabel: varchar("scheduleLabel", { length: 120 }).notNull(),
+  scheduleTimes: text("scheduleTimes").notNull(),
+  refillDate: timestamp("refillDate"),
+  remainingDoses: int("remainingDoses").default(0).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const doseEvents = mysqlTable("dose_events", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),
+  medicineId: int("medicineId").notNull(),
+  scheduledFor: timestamp("scheduledFor").notNull(),
+  status: mysqlEnum("status", ["due", "taken", "missed", "upcoming"]).default("upcoming").notNull(),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const reminderConfigs = mysqlTable("reminder_configs", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),
+  medicineId: int("medicineId"),
+  kind: mysqlEnum("kind", ["dose", "refill"]).notNull(),
+  leadMinutes: int("leadMinutes").default(30).notNull(),
+  emailEnabled: int("emailEnabled").default(0).notNull(),
+  scheduleCronTaskUid: varchar("schedule_cron_task_uid", { length: 65 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
-
-// TODO: Add your tables here
+export type Medicine = typeof medicines.$inferSelect;
+export type InsertMedicine = typeof medicines.$inferInsert;
+export type DoseEvent = typeof doseEvents.$inferSelect;
+export type InsertDoseEvent = typeof doseEvents.$inferInsert;
+export type ReminderConfig = typeof reminderConfigs.$inferSelect;
+export type InsertReminderConfig = typeof reminderConfigs.$inferInsert;

@@ -1,0 +1,30 @@
+# Project TODO
+
+- [x] Define the responsive workspace information architecture for medicines, today's doses, refills, and safety notes
+- [x] Implement the architectural blueprint visual system with deep royal-blue background, precise grid, white technical linework, dimension markers, rectangular frames, and restrained teal accents
+- [x] Customize the authenticated dashboard shell for the pharmacy checklist workspace
+- [x] Build the medicine creation/editing flow for name, dosage instructions, schedule, refill date, and notes
+- [x] Build due, taken, missed, and refill-soon status views with search and filtering
+- [x] Add completion-state interactions with accessible feedback and optimistic UI behavior
+- [x] Add concise medication safety messaging that explicitly states the checklist is for organization, not medical advice
+- [x] Extend the Drizzle schema with MongoDB-compatible medicine/checklist/reminder data structures
+- [x] Add backend query and mutation helpers for user-owned medicines and dose completion records
+- [x] Add Supabase integration seam and environment configuration documentation without exposing secrets
+- [x] Add scheduled reminder configuration for approaching doses and refill dates using the supported background-job pathway
+- [x] Add in-app reminder presentation and backend-ready email reminder delivery pathway
+- [x] Add Vitest coverage for checklist data behavior and reminder scheduling logic
+- [x] Run type checks, tests, and production build validation
+- [x] Capture responsive desktop and mobile screenshots and fix visual issues
+- [x] Save a final checkpoint and report what was added and how it was created
+- [x] Add medicine editing and notes support in the workspace form and persisted data flow
+- [x] Wire dose completion to tRPC mutations with optimistic update/rollback and success/error feedback
+- [x] Document SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY/SUPABASE_ANON_KEY, and MONGODB_URI setup in a dedicated integration document
+- [x] Implement reminder scheduling mutations using Heartbeat job creation/update and persist scheduleCronTaskUid
+- [x] Add a provider-agnostic backend email reminder service stub with invocation points and error handling
+- [x] Add Vitest tests for medicine CRUD/checklist behavior and reminder scheduling/callback logic
+- [x] Create a final checkpoint and provide the user-facing implementation report before marking handoff complete
+- [x] Wire medicine create/edit, including notes, to persisted tRPC/database flows and add a medicine update procedure
+- [x] Fix completion actions to target real dose-event records rather than medicine IDs while keeping optimistic rollback and toast feedback
+- [x] Add reminder update, pause, and resume flows using updateHeartbeatJob and persist task UID changes
+- [x] Invoke the email reminder adapter from the scheduled reminder callback with safe deduplication and error handling
+- [x] Add Vitest coverage for medicine CRUD/checklist mutations and reminder scheduling/callback behavior

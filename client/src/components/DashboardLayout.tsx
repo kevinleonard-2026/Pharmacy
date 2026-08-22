@@ -21,15 +21,17 @@ import {
 } from "@/components/ui/sidebar";
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { CalendarCheck2, ClipboardList, LogOut, PanelLeft, Pill, Settings2 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: ClipboardList, label: "Overview", path: "/" },
+  { icon: Pill, label: "Medicine cabinet", path: "/cabinet" },
+  { icon: CalendarCheck2, label: "Schedules", path: "/schedules" },
+  { icon: Settings2, label: "Reminder settings", path: "/reminders" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -39,8 +41,10 @@ const MAX_WIDTH = 480;
 
 export default function DashboardLayout({
   children,
+  requireAuth = false,
 }: {
   children: React.ReactNode;
+  requireAuth?: boolean;
 }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
@@ -56,7 +60,7 @@ export default function DashboardLayout({
     return <DashboardLayoutSkeleton />
   }
 
-  if (!user) {
+  if (requireAuth && !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
@@ -169,7 +173,7 @@ function DashboardLayoutContent({
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-semibold tracking-tight truncate">
-                    Navigation
+                    MedGrid / 01
                   </span>
                 </div>
               ) : null}
