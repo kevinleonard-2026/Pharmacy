@@ -1,4 +1,4 @@
-import { and, eq, desc } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { DoseEvent, InsertFavoritePharmacy, InsertMedicine, InsertReminderConfig, InsertUser, doseEvents, favoritePharmacies, medicines, reminderConfigs, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -95,14 +95,41 @@ export async function getUserByOpenId(openId: string) {
 export async function listMedicinesForOwner(ownerId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(medicines).where(eq(medicines.ownerId, ownerId)).orderBy(desc(medicines.updatedAt));
+
+  const rows = await db
+    .select({ medicine: medicines, doseEvent: doseEvents })
+    .from(medicines)
+    .leftJoin(
+      doseEvents,
+      and(eq(doseEvents.medicineId, medicines.id), eq(doseEvents.ownerId, ownerId)),
+    )
+    .where(eq(medicines.ownerId, ownerId))
+    .orderBy(desc(medicines.updatedAt), desc(doseEvents.scheduledFor));
+
+  const latestByMedicine = new Map<number, (typeof rows)[number]>();
+  for (const row of rows) {
+    if (!latestByMedicine.has(row.medicine.id)) latestByMedicine.set(row.medicine.id, row);
+  }
+  return Array.from(latestByMedicine.values());
 }
 
 export async function createMedicineForOwner(ownerId: number, input: Omit<InsertMedicine, "ownerId">) {
   const db = await getDb();
   if (!db) throw new Error("Database is not available");
-  const result = await db.insert(medicines).values({ ...input, ownerId });
-  return result;
+
+  return db.transaction(async tx => {
+    const result = await tx.insert(medicines).values({ ...input, ownerId });
+    const medicineId = Number((result as any)[0]?.insertId ?? 0);
+    if (!medicineId) throw new Error("Medicine could not be created");
+
+    const doseResult = await tx.insert(doseEvents).values({
+      ownerId,
+      medicineId,
+      scheduledFor: new Date(),
+      status: "due",
+    });
+    return { medicineId, doseEventId: Number((doseResult as any)[0]?.insertId ?? 0) };
+  });
 }
 
 export async function updateDoseEventStatus(ownerId: number, doseEventId: number, status: DoseEvent["status"]) {

@@ -21,12 +21,37 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 type Status = "due" | "taken" | "missed" | "upcoming";
 type Medicine = { id: number; doseEventId: number; name: string; dose: string; form: string; schedule: string; next: string; status: Status; refill: string; refillSoon: boolean; instructions: string; notes?: string; accent: string };
+type BackendMedicine = { medicine: { id: number; name: string; dose: string; form: string; scheduleLabel: string; instructions: string; refillDate: Date | string | null; remainingDoses: number; notes: string | null }; doseEvent: { id: number; status: Status } | null };
+
+function formatRefillDate(value: Date | string | null) {
+  if (!value) return "—";
+  return new Date(value).toLocaleDateString(undefined, { month: "short", day: "2-digit" });
+}
+
+function toMedicine(record: BackendMedicine): Medicine {
+  const status = record.doseEvent?.status ?? "upcoming";
+  return {
+    id: record.medicine.id,
+    doseEventId: record.doseEvent?.id ?? 0,
+    name: record.medicine.name,
+    dose: record.medicine.dose,
+    form: record.medicine.form,
+    schedule: record.medicine.scheduleLabel,
+    next: status === "taken" ? "Taken" : status === "missed" ? "Missed" : status === "due" ? "Due now" : "Upcoming",
+    status,
+    refill: formatRefillDate(record.medicine.refillDate),
+    refillSoon: Boolean(record.medicine.refillDate && new Date(record.medicine.refillDate).getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000) || record.medicine.remainingDoses <= 5,
+    instructions: record.medicine.instructions,
+    notes: record.medicine.notes ?? "",
+    accent: "teal",
+  };
+}
 
 const starterMedicines: Medicine[] = [
   { id: 1, doseEventId: 101, name: "Lisinopril", dose: "10 mg", form: "Tablet", schedule: "Every morning · 08:00", next: "Due now", status: "due", refill: "Sep 05", refillSoon: false, instructions: "Take with water. Keep the timing consistent.", accent: "teal" },
@@ -54,9 +79,14 @@ export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState<Medicine | null>(null);
   const [showReminders, setShowReminders] = useState(false);
+  const medicinesQuery = trpc.medicines.list.useQuery(undefined, { enabled: Boolean(user) });
   const markDose = trpc.doseEvents.mark.useMutation();
   const createMedicine = trpc.medicines.create.useMutation();
   const updateMedicine = trpc.medicines.update.useMutation();
+
+  useEffect(() => {
+    if (medicinesQuery.data) setMedicines((medicinesQuery.data as BackendMedicine[]).map(toMedicine));
+  }, [medicinesQuery.data]);
 
   const visibleMedicines = useMemo(() => medicines.filter((medicine) => {
     const matchesQuery = medicine.name.toLowerCase().includes(query.toLowerCase()) || medicine.dose.toLowerCase().includes(query.toLowerCase());
@@ -69,7 +99,12 @@ export default function Home() {
     if (!previous) return;
     const nextStatus: Status = previous.status === "taken" ? "due" : "taken";
     setMedicines((items) => items.map((item) => item.id === id ? { ...item, status: nextStatus, next: nextStatus === "taken" ? "Taken just now" : "Due now" } : item));
-    markDose.mutate({ id: previous.doseEventId, status: nextStatus }, { onSuccess: () => toast.success(`${previous.name} marked ${nextStatus === "taken" ? "taken" : "due"}.`), onError: () => { setMedicines((items) => items.map((item) => item.id === id && previous ? previous : item)); toast.error("Could not sync this change yet; your view was restored."); } });
+    if (!previous.doseEventId) {
+      toast.error("This medicine has no dose event to update yet.");
+      setMedicines((items) => items.map((item) => item.id === id && previous ? previous : item));
+      return;
+    }
+    markDose.mutate({ id: previous.doseEventId, status: nextStatus }, { onSuccess: () => { toast.success(`${previous.name} marked ${nextStatus === "taken" ? "taken" : "due"}.`); medicinesQuery.refetch(); }, onError: () => { setMedicines((items) => items.map((item) => item.id === id && previous ? previous : item)); toast.error("Could not sync this change yet; your view was restored."); } });
   };
 
   const addMedicine = (event: FormEvent<HTMLFormElement>) => {
@@ -78,8 +113,11 @@ export default function Home() {
     const record = { name: String(form.get("name") || "New medicine"), dose: String(form.get("dose") || "—"), form: "Tablet", schedule: String(form.get("schedule") || "As scheduled"), next: editingMedicine?.next || "Due now", status: editingMedicine?.status || "due" as Status, refill: String(form.get("refill") || "—"), refillSoon: editingMedicine?.refillSoon || false, instructions: String(form.get("instructions") || "Follow the prescription label."), notes: String(form.get("notes") || ""), accent: editingMedicine?.accent || "teal" };
     setMedicines((items) => editingMedicine ? items.map((item) => item.id === editingMedicine.id ? { ...item, ...record } : item) : [{ id: Date.now(), doseEventId: Date.now() + 1, ...record }, ...items]);
     const backendPayload = { name: record.name, dose: record.dose, form: record.form, instructions: record.instructions, scheduleLabel: record.schedule, scheduleTimes: record.schedule, notes: record.notes || null, remainingDoses: 0, refillDate: null };
-    if (editingMedicine) updateMedicine.mutate({ id: editingMedicine.id, patch: backendPayload }, { onError: () => toast.error("Saved locally; backend sync will retry when signed in.") });
-    else createMedicine.mutate(backendPayload, { onError: () => toast.error("Added locally; backend sync will retry when signed in.") });
+    if (editingMedicine) {
+      updateMedicine.mutate({ id: editingMedicine.id, patch: backendPayload }, { onSuccess: () => medicinesQuery.refetch(), onError: () => toast.error("Saved locally; backend sync will retry when signed in.") });
+    } else {
+      createMedicine.mutate(backendPayload, { onSuccess: () => medicinesQuery.refetch(), onError: () => toast.error("Added locally; backend sync will retry when signed in.") });
+    }
     toast.success(editingMedicine ? "Medicine details updated." : "Medicine added to checklist.");
     setShowForm(false);
     setEditingMedicine(null);
