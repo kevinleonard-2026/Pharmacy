@@ -89,6 +89,15 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function listUsersForAdmin() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({ id: users.id, name: users.name, email: users.email, role: users.role, createdAt: users.createdAt, lastSignedIn: users.lastSignedIn })
+    .from(users)
+    .orderBy(desc(users.createdAt));
+}
+
 // TODO: add feature queries here as your schema grows.
 
 

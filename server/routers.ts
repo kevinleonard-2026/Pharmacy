@@ -4,14 +4,17 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { createHeartbeatJob, updateHeartbeatJob } from "./_core/heartbeat";
 import { systemRouter } from "./_core/systemRouter";
-import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { createMedicineForOwner, createReminderConfigForOwner, listFavoritePharmaciesForOwner, listMedicinesForOwner, listReminderConfigsForOwner, removeFavoritePharmacyForOwner, saveFavoritePharmacyForOwner, setReminderTaskUid, updateDoseEventStatus, updateMedicineForOwner, updateReminderConfigForOwner } from "./db";
+import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
+import { createMedicineForOwner, createReminderConfigForOwner, listFavoritePharmaciesForOwner, listMedicinesForOwner, listReminderConfigsForOwner, listUsersForAdmin, removeFavoritePharmacyForOwner, saveFavoritePharmacyForOwner, setReminderTaskUid, updateDoseEventStatus, updateMedicineForOwner, updateReminderConfigForOwner } from "./db";
 import { getIntegrationStatus } from "./integrations";
 
 const medicineInput = z.object({ name: z.string().min(1).max(160), dose: z.string().min(1).max(120), form: z.string().default("Tablet"), instructions: z.string().min(1), scheduleLabel: z.string().min(1), scheduleTimes: z.string().min(1), refillDate: z.date().nullable().optional(), remainingDoses: z.number().int().nonnegative().default(0), notes: z.string().nullable().optional() });
 
 export const appRouter = router({
   system: systemRouter,
+  admin: router({
+    users: adminProcedure.query(() => listUsersForAdmin()),
+  }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => { const cookieOptions = getSessionCookieOptions(ctx.req); ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 }); return { success: true } as const; }),

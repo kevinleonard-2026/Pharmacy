@@ -127,7 +127,7 @@ export default function Home() {
   const counts = { due: medicines.filter((m) => m.status === "due").length, taken: medicines.filter((m) => m.status === "taken").length, missed: medicines.filter((m) => m.status === "missed").length, refill: medicines.filter((m) => m.refillSoon).length };
   const firstName = user?.name?.split(" ")[0] || "there";
 
-  return <DashboardLayout>
+  return <DashboardLayout requireAuth>
     <div className="workspace-shell">
       <header className="workspace-header blueprint-frame">
         <div className="header-kicker"><Crosshair size={14} /> DAILY MEDICATION GRID <span>v1.0 / UTC+LOCAL</span></div>
